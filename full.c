@@ -1,59 +1,95 @@
+#pragma
 #include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include "commands.h"
-#include "functions.h"
-#include "shell.h"
-
-
+// #include "commands.h"
+// #include "functions.h"
+// #include "shell.h"
 #define SIZE 1024       // Defines SIZE for standard input of 1024 characters, it is used for the commented out read() function
 #define WORD 128        // Defines WORD as the int of 128
 #define check " \t\r\n\a"
-/*
-This Code is an older implementation of getting input from the user and reallocates memory using the buffer
-*/
-// char *read(){
-//     int position=0;
-//     char *buffer= malloc(sizeof(char)*SIZE);
-//     int character;
-//     int size=SIZE;
+char *shell_read();
 
-//     // if buffer is null, then report to user of allocation error and exit the program 
-//     if(!buffer){
-//         fprintf(stderr, 'shell: allocation error\n');
-//         exit(EXIT_FAILURE);
-//     }
-//     /*
-//     Infinite loop to get character from the user, each letter at a time 
-//     It will realloc new memory space with more space and return a pointer assigned to buffer
-//     */
-//     while(1){
-//         character=getchar();
-//         //checks if the character is a end of the line or "/n" since it is a integer the EOF can be checked
-//         if(character==EOF || character=="\n"){
-//             buffer[position]="\0";
-//             return buffer;
-//         }
-//         buffer[position]=character;
-//         position++;
+char **interpret(char *line);
 
-//         if(position>=size){
-//             size+=SIZE;
-//             buffer=realloc(buffer, size);
-//             if(!buffer){
-//                 fprintf(stderr, 'shell: allocation error\n');
-//                 exit(EXIT_FAILURE);
-//             }
-//         }
-//     }
-// }
+int launch(char **argument);
+
+int execute(char **argument);
+
+void shell(void);
+
+int shell_cd(char **argument);
+int ls_help(char **argument);
+int shell_exit(char **argument);
+
+char *strings[]={
+    "help",
+    "cd",
+    "exit"
+};
+
+int (*function[]) (char**)= {
+    &shell_cd,
+    &ls_help,
+    &shell_exit
+};
+
+int number_calls(){
+    return (sizeof(strings)/sizeof(char*));
+}
+int shell_cd(char **argument){
+    if (argument[1]==NULL){
+        fprintf(stderr,"shell: expected argument to \'cd\'\n");
+    }
+    else{
+        //chdir command is a system function (system call) which is used to change the current 
+        //working directory.
+        if(chdir(argument[1])!=0){
+            perror("shell");
+        };
+    }
+    return 1;
+}
+int ls_help(char **argument){
+    printf("Shubh's Shell:\n");
+    printf("Type program names and arguments, and press enter");
+    printf("builtins include:\n");
+
+    for(int counter=0; counter<number_calls();counter++ ){
+        printf("    %s\n",strings[counter]);
+    }
+    printf("Use the man command or information on other programs. \n");
+    return 1;
+}
+int shell_exit(char **argument){
+    return 0;
+}
+
+void shell(){
+    char *line;
+    char **argument;
+    int status;
+    char *name;
+    do{
+        printf("~ ");
+        line=shell_read();
+        argument=interpret(line);
+        status=execute(argument);
+
+        free(line);
+        free(argument);
+    }while(status);
+
+
+}
+
 char *shell_read(void){
     char *line=NULL;
-    int buffer=0;
+    ssize_t buffer=0;
 
-    if(getline(&line,&buffer,stdin)==-1){
+    if(getline(&line, &buffer, stdin)==-1){
         
         /*
         feof:   The C library function int feof(FILE *stream) tests the end-of-file indicator for the given stream.
@@ -78,7 +114,7 @@ char *shell_read(void){
         if(feof(stdin)){
             exit(EXIT_SUCCESS);
         }
-        perror("readline");
+        perror("shell: getline\n");
         exit(EXIT_FAILURE);
 
     }
@@ -132,12 +168,12 @@ int launch(char **argument){
     pid=fork();
     if(pid==0){
         if(execvp(argument[0],argument)==-1){
-            perror('shell');
+            perror("shell");
         }
         exit(EXIT_FAILURE);
     }
     else if(pid<0){
-        perror('shell');
+        perror("shell");
         //if there is an error in forking
     }
     else{
@@ -165,10 +201,17 @@ int execute(char **argument){
     }
 
     for(int i=0; i< number_calls();i++){
-        if(strcmp(argument[0],*function[i])==0){
+        if(strcmp(argument[0],strings[i])==0){
             return (*function[i])(argument);
         }
     }
     return launch(argument);
 
+}
+
+int main(){
+
+shell();
+
+return EXIT_SUCCESS;
 }

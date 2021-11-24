@@ -1,1 +1,1 @@
-void shell();
+void shell(void);
