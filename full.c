@@ -8,7 +8,7 @@
 // #include "functions.h"
 // #include "shell.h"
 #define SIZE 1024       // Defines SIZE for standard input of 1024 characters, it is used for the commented out read() function
-#define WORD 128        // Defines WORD as the int of 128
+#define WORD 64        // Defines WORD as the int of 128
 #define check " \t\r\n\a"
 char *shell_read();
 
@@ -87,7 +87,7 @@ void shell(){
 
 char *shell_read(void){
     char *line=NULL;
-    ssize_t buffer=0;
+    size_t buffer=0;
 
     if(getline(&line, &buffer, stdin)==-1){
         
@@ -114,18 +114,20 @@ char *shell_read(void){
         if(feof(stdin)){
             exit(EXIT_SUCCESS);
         }
+        else{
         perror("shell: getline\n");
         exit(EXIT_FAILURE);
+        }
 
     }
 return line;
-
+ 
 }
 char **interpret(char* line){
     int buffer=WORD;
     int position=0;
     char **words=malloc(WORD*sizeof(char*));
-    char *word;
+    char *word, **backup;
 
     //if words is NULL then allaocation of memory did not work
     if(!words){
@@ -142,9 +144,11 @@ char **interpret(char* line){
 
         if(position>=buffer){
             buffer+=WORD;
+            backup=words;
             words=realloc(words, buffer*sizeof(char*));
             //if words is NULL then there was a memory allocation error in the realloc function call
             if(!words){
+                free(backup);
                 fprintf(stderr,"shell: allocation error\n");
                 exit(EXIT_FAILURE);
             }
@@ -155,8 +159,6 @@ char **interpret(char* line){
     }
     words[position]=NULL;
     return words;
-
-
 }
 
 int launch(char **argument){
