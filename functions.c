@@ -7,7 +7,6 @@
 #include "functions.h"
 #include "shell.h"
 
-
 #define SIZE 1024       // Defines SIZE for standard input of 1024 characters, it is used for the commented out read() function
 #define WORD 128        // Defines WORD as the int of 128
 #define check " \t\r\n\a"
