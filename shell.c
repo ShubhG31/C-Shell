@@ -6,6 +6,7 @@
 #include "commands.h"
 #include "functions.h"
 #include "shell.h"
+
 /*
 ssh reads the line inputed into the shell 
 finds the arguements inside the inputted into the shell

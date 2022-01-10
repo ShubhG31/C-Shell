@@ -2,6 +2,7 @@ int shell_cd(char **argument);
 int ls_help(char **argument);
 int shell_exit(char **argument);
 
+
 char *strings[]={
     "help",
     "cd",

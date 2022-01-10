@@ -7,6 +7,7 @@
 #include "functions.h"
 #include "shell.h"
 
+
 int shell_cd(char **argument){
     if (argument[1]==NULL){
         fprintf(stderr,"shell: expected argument to \'cd\'\n");
