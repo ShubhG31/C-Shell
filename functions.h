@@ -1,4 +1,4 @@
-
+#pragma once 
 
 
 char *shell_read();

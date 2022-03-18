@@ -33,8 +33,8 @@ char *strings[]={
 };
 
 int (*function[]) (char**)= {
-    &shell_cd,
     &ls_help,
+    &shell_cd,
     &shell_exit
 };
 

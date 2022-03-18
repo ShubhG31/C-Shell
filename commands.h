@@ -1,3 +1,6 @@
+#pragma once 
+
+
 int shell_cd(char **argument);
 int ls_help(char **argument);
 int shell_exit(char **argument);
